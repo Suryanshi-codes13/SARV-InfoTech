@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000;
+            font-family: Arial, sans-serif;
+        }
+
+        body.light-mode {
+            background-color: #eeeeee;
+        }
+
+        .calculator {
+            width: 420px;
+            padding: 25px;
+            border: 1px solid #333333;
+            background-color: #080808;
+        }
+
+        body.light-mode .calculator {
+            border-color: #cccccc;
+            background-color: white;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            margin: 0;
+            color: white;
+            text-align: center;
+            font-size: 27px;
+        }
+
+        body.light-mode h1 {
+            color: #111111;
+        }
+
+        #themeButton {
+            width: auto;
+            height: 38px;
+            padding: 0 14px;
+            border: 1px solid #444444;
+            font-size: 14px;
+        }
+
+        #display {
+            height: 130px;
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            overflow: hidden;
+            border: 1px solid #353535;
+            color: white;
+            background-color: #000000;
+            font-size: 52px;
+        }
+
+        body.light-mode #display {
+            border-color: #dddddd;
+            color: #111111;
+            background-color: #f1f2f5;
+        }
+
+        #modeButton {
+            width: 100%;
+            height: 54px;
+            margin-top: 15px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .scientific-buttons {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .scientific-buttons.show {
+            display: grid;
+        }
+
+        .scientific-buttons button {
+            height: 58px;
+            font-size: 18px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            height: 88px;
+            border: none;
+            color: white;
+            background-color: #1d1d1f;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #29292c;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .action {
+            color: #dddddd;
+        }
+
+        .operator {
+            background-color: #202124;
+        }
+
+        .equal {
+            color: #111111;
+            background-color: #eeeeee;
+        }
+
+        .equal:hover {
+            background-color: white;
+        }
+
+        body.light-mode button {
+            color: #111111;
+            background-color: #e5e7eb;
+        }
+
+        body.light-mode button:hover {
+            background-color: #d7d9de;
+        }
+
+        body.light-mode .operator {
+            background-color: #d8dbe0;
+        }
+
+        body.light-mode .equal {
+            color: white;
+            background-color: #222222;
+        }
+
+        body.light-mode .equal:hover {
+            background-color: #000000;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                width: 100%;
+                min-height: 100vh;
+                padding: 20px;
+                border: none;
+            }
+
+            button {
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1>Calculator</h1>
+            <button id="themeButton" data-action="theme">Light Mode</button>
+        </div>
+
+        <div id="display">0</div>
+
+        <button id="modeButton" data-action="mode">Scientific Mode</button>
+
+        <div class="scientific-buttons" id="scientificButtons">
+            <button data-scientific="sqrt">√</button>
+            <button data-scientific="square">x²</button>
+            <button data-scientific="inverse">1/x</button>
+            <button data-scientific="sign">+/−</button>
+
+            <button data-scientific="pi">π</button>
+            <button data-scientific="sin">sin</button>
+            <button data-scientific="cos">cos</button>
+            <button data-scientific="tan">tan</button>
+        </div>
+
+        <div class="buttons">
+            <button class="action" data-action="clear">AC</button>
+            <button class="action" data-action="delete">⌫</button>
+            <button class="action" data-action="percent">%</button>
+            <button class="operator" data-operator="/">÷</button>
+
+            <button data-number="7">7</button>
+            <button data-number="8">8</button>
+            <button data-number="9">9</button>
+            <button class="operator" data-operator="*">×</button>
+
+            <button data-number="4">4</button>
+            <button data-number="5">5</button>
+            <button data-number="6">6</button>
+            <button class="operator" data-operator="-">−</button>
+
+            <button data-number="1">1</button>
+            <button data-number="2">2</button>
+            <button data-number="3">3</button>
+            <button class="operator" data-operator="+">+</button>
+
+            <button class="action" data-action="sign">±</button>
+            <button data-number="0">0</button>
+            <button data-number=".">.</button>
+            <button class="equal" data-action="equal">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById("display");
+        let buttons = document.querySelectorAll("button");
+        let scientificButtons = document.getElementById("scientificButtons");
+        let modeButton = document.getElementById("modeButton");
+        let themeButton = document.getElementById("themeButton");
+
+        let firstNumber = "";
+        let operator = "";
+        let startNewNumber = false;
+
+        function addNumber(number) {
+            if (display.innerText === "Error" || startNewNumber === true) {
+                display.innerText = "0";
+                startNewNumber = false;
+            }
+
+            if (number === ".") {
+                if (display.innerText.includes(".")) {
+                    return;
+                }
+                display.innerText += ".";
+            } else if (display.innerText === "0") {
+                display.innerText = number;
+            } else if (display.innerText.length < 12) {
+                display.innerText += number;
+            }
+        }
+
+        function selectOperator(selectedOperator) {
+            if (display.innerText === "Error") {
+                return;
+            }
+
+            if (operator !== "" && startNewNumber === false) {
+                calculate();
+                if (display.innerText === "Error") {
+                    return;
+                }
+            }
+
+            firstNumber = display.innerText;
+            operator = selectedOperator;
+            startNewNumber = true;
+        }
+
+        function calculate() {
+            if (operator === "" || startNewNumber === true) {
+                return;
+            }
+
+            let number1 = parseFloat(firstNumber);
+            let number2 = parseFloat(display.innerText);
+            let answer;
+
+            if (operator === "+") {
+                answer = number1 + number2;
+            } else if (operator === "-") {
+                answer = number1 - number2;
+            } else if (operator === "*") {
+                answer = number1 * number2;
+            } else if (operator === "/") {
+                if (number2 === 0) {
+                    display.innerText = "Error";
+                    firstNumber = "";
+                    operator = "";
+                    startNewNumber = true;
+                    return;
+                }
+                answer = number1 / number2;
+            }
+
+            display.innerText = parseFloat(answer.toFixed(10));
+            firstNumber = "";
+            operator = "";
+            startNewNumber = true;
+        }
+
+        function clearCalculator() {
+            display.innerText = "0";
+            firstNumber = "";
+            operator = "";
+            startNewNumber = false;
+        }
+
+        function deleteNumber() {
+            if (startNewNumber === true || display.innerText === "Error") {
+                return;
+            }
+
+            if (display.innerText.length > 1) {
+                display.innerText = display.innerText.slice(0, -1);
+
+                if (display.innerText === "-") {
+                    display.innerText = "0";
+                }
+            } else {
+                display.innerText = "0";
+            }
+        }
+
+        function changeSign() {
+            if (display.innerText !== "0" && display.innerText !== "Error") {
+                display.innerText = String(parseFloat(display.innerText) * -1);
+            }
+        }
+
+        function findPercentage() {
+            if (display.innerText !== "Error") {
+                display.innerText = String(parseFloat(display.innerText) / 100);
+            }
+        }
+
+        function showAnswer(answer) {
+            if (isNaN(answer) || answer === Infinity || answer === -Infinity) {
+                display.innerText = "Error";
+            } else {
+                display.innerText = parseFloat(answer.toFixed(10));
+            }
+
+            startNewNumber = true;
+        }
+
+        function scientificCalculation(type) {
+            let number = parseFloat(display.innerText);
+
+            if (display.innerText === "Error") {
+                return;
+            }
+
+            if (type === "sqrt") {
+                if (number < 0) {
+                    display.innerText = "Error";
+                } else {
+                    showAnswer(Math.sqrt(number));
+                }
+            } else if (type === "square") {
+                showAnswer(number * number);
+            } else if (type === "inverse") {
+                if (number === 0) {
+                    display.innerText = "Error";
+                } else {
+                    showAnswer(1 / number);
+                }
+            } else if (type === "sign") {
+                changeSign();
+            } else if (type === "pi") {
+                showAnswer(Math.PI);
+            } else if (type === "sin") {
+                showAnswer(Math.sin(number * Math.PI / 180));
+            } else if (type === "cos") {
+                showAnswer(Math.cos(number * Math.PI / 180));
+            } else if (type === "tan") {
+                let angle = number * Math.PI / 180;
+
+                if (Math.abs(Math.cos(angle)) < 0.0000000001) {
+                    display.innerText = "Error";
+                } else {
+                    showAnswer(Math.tan(angle));
+                }
+            }
+        }
+
+        function changeMode() {
+            scientificButtons.classList.toggle("show");
+
+            if (scientificButtons.classList.contains("show")) {
+                modeButton.innerText = "Basic Mode";
+            } else {
+                modeButton.innerText = "Scientific Mode";
+            }
+        }
+
+        function changeTheme() {
+            document.body.classList.toggle("light-mode");
+
+            if (document.body.classList.contains("light-mode")) {
+                themeButton.innerText = "Dark Mode";
+            } else {
+                themeButton.innerText = "Light Mode";
+            }
+        }
+
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", function () {
+                let number = this.getAttribute("data-number");
+                let selectedOperator = this.getAttribute("data-operator");
+                let action = this.getAttribute("data-action");
+                let scientific = this.getAttribute("data-scientific");
+
+                if (number !== null) {
+                    addNumber(number);
+                } else if (selectedOperator !== null) {
+                    selectOperator(selectedOperator);
+                } else if (scientific !== null) {
+                    scientificCalculation(scientific);
+                } else if (action === "clear") {
+                    clearCalculator();
+                } else if (action === "delete") {
+                    deleteNumber();
+                } else if (action === "percent") {
+                    findPercentage();
+                } else if (action === "sign") {
+                    changeSign();
+                } else if (action === "equal") {
+                    calculate();
+                } else if (action === "mode") {
+                    changeMode();
+                } else if (action === "theme") {
+                    changeTheme();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
